@@ -330,7 +330,7 @@
         // UPDATE THIS: Replace with your API Gateway endpoint URL
         // Example: https://abc123xyz.execute-api.us-east-1.amazonaws.com/prod/agent
         // ============================================================
-        const API_ENDPOINT = 'https://8j6mnd7c41.execute-api.eu-west-2.amazonaws.com/prod/agent';
+        const API_ENDPOINT = 'YOUR_API_GATEWAY_URL';
 
         // DOM Elements
         const input = document.getElementById('input');
@@ -366,8 +366,9 @@
                         <a href="https://docs.digitalden.cloud/posts/building-a-bedrock-agent-with-aws-news-search" target="_blank">README →</a>
                     </div>
                     <div class="suggestions">
-                        <button class="suggestion" onclick="askQuestion('What is new with Lambda?')">What's new with Lambda?</button>
+                        <button class="suggestion" onclick="askQuestion('What are the most recent AWS announcements?')">Recent AWS announcements</button>
                         <button class="suggestion" onclick="askQuestion('Any recent Bedrock updates?')">Bedrock updates</button>
+                        <button class="suggestion" onclick="askQuestion('What is Amazon Bedrock?')">What is Bedrock?</button>
                         <button class="suggestion" onclick="askQuestion('What is Amazon Bedrock?')">What is Bedrock?</button>
                     </div>
                 </div>`;
