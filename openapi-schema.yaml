@@ -1,0 +1,37 @@
+openapi: 3.0.0
+info:
+  title: AWS News Search API
+  version: 1.0.0
+  description: API to search the AWS News Blog RSS feed.
+paths:
+  /search-news:
+    get:
+      summary: Searches the AWS News Blog for posts matching a topic.
+      description: Fetches the RSS feed and returns matching posts with titles, descriptions, and links.
+      operationId: searchNews
+      parameters:
+        - name: topic
+          in: query
+          description: The topic to search for, such as Lambda, Bedrock, or S3
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of matching posts.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        link:
+                          type: string
+                        description:
+                          type: string
