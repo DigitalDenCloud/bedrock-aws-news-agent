@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS News Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='15' fill='%23008000'/><rect x='15' y='20' width='70' height='60' rx='5' fill='none' stroke='white' stroke-width='5'/><path d='M28 40 L43 50 L28 60' stroke='white' stroke-width='5' stroke-linecap='round' stroke-linejoin='round' fill='none'/><line x1='50' y1='65' x2='72' y2='65' stroke='white' stroke-width='5' stroke-linecap='round'/></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: #0d1117;
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 16px;
+            color: #e6edf3;
+        }
+
+        .terminal {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .terminal-header {
+            background: #161b22;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #30363d;
+            flex-shrink: 0;
+        }
+
+        .terminal-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .terminal-title span {
+            color: #7d8590;
+            font-size: 14px;
+        }
+
+        .terminal-tab {
+            background: #0d1117;
+            color: #e6edf3;
+            padding: 8px 18px;
+            border-radius: 6px 6px 0 0;
+            font-size: 14px;
+            border: 1px solid #30363d;
+            border-bottom: none;
+            margin-bottom: -1px;
+        }
+
+        .terminal-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        .terminal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal-body::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        .output-line {
+            margin-bottom: 6px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .output-line.system {
+            color: #7d8590;
+        }
+
+        .output-line.system a,
+        .output-line.response a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+
+        .output-line.system a:hover,
+        .output-line.response a:hover {
+            text-decoration: underline;
+        }
+
+        .output-line.user {
+            color: #58a6ff;
+        }
+
+        .output-line.response {
+            color: #e6edf3;
+        }
+
+        .output-line.error {
+            color: #f85149;
+        }
+
+        .input-container {
+            background: #161b22;
+            padding: 14px 16px;
+            border-top: 1px solid #30363d;
+            flex-shrink: 0;
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .prompt {
+            color: #3fb950;
+            user-select: none;
+        }
+
+        #input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #e6edf3;
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: inherit;
+            caret-color: #3fb950;
+        }
+
+        #input::placeholder {
+            color: #484f58;
+        }
+
+        .send-btn {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Chakra Petch', sans-serif;
+            cursor: pointer;
+        }
+
+        .send-btn:hover {
+            background: #161b22;
+            border-color: #3fb950;
+        }
+
+        .send-btn:disabled {
+            background: #21262d;
+            color: #484f58;
+            cursor: not-allowed;
+            border-color: #30363d;
+        }
+
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .welcome {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .ascii-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .ascii-title {
+            color: #FF9900;
+            font-size: 10px;
+            line-height: 1.1;
+            white-space: pre;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .version {
+            color: #3fb950;
+            font-size: 14px;
+            padding-bottom: 4px;
+        }
+
+        .welcome-description {
+            color: #7d8590;
+            margin-bottom: 14px;
+        }
+
+        .instructions {
+            color: #7d8590;
+            margin-bottom: 12px;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .instructions span {
+            color: #e6edf3;
+        }
+
+        .readme-link {
+            margin-bottom: 18px;
+        }
+
+        .readme-link a {
+            color: #58a6ff;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .readme-link a:hover {
+            text-decoration: underline;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .suggestion {
+            background: #21262d;
+            color: #7d8590;
+            border: 1px solid #30363d;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: 'Chakra Petch', sans-serif;
+        }
+
+        .suggestion:hover {
+            background: #30363d;
+            color: #e6edf3;
+            border-color: #58a6ff;
+        }
+
+        .init-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #7d8590;
+        }
+
+        .init-loading-text {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #30363d;
+            border-top-color: #3fb950;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="terminal-header">
+            <div class="terminal-title">
+                <div class="terminal-tab">aws-news-agent</div>
+                <span>Powered by Amazon Bedrock</span>
+            </div>
+        </div>
+        
+        <div class="terminal-body" id="output">
+            <div class="init-loading" id="initLoading">
+                <div class="spinner"></div>
+                <div class="init-loading-text">Preparing terminal...</div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <div class="input-line">
+                <span class="prompt">$</span>
+                <input type="text" id="input" placeholder="Ask a question..." disabled>
+                <button class="send-btn" id="sendBtn" onclick="handleSend()" disabled>Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // UPDATE THIS: Replace with your API Gateway endpoint URL
+        // Example: https://abc123xyz.execute-api.us-east-1.amazonaws.com/prod/agent
+        // ============================================================
+        const API_ENDPOINT = 'https://8j6mnd7c41.execute-api.eu-west-2.amazonaws.com/prod/agent';
+
+        // DOM Elements
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        const sendBtn = document.getElementById('sendBtn');
+        const initLoading = document.getElementById('initLoading');
+
+        // Session ID for multi-turn conversation
+        const sessionId = 'session-' + Date.now();
+
+        // ASCII Art (single source of truth)
+        const ASCII_ART = `█████╗ ██╗    ██╗███████╗    ███╗   ██╗███████╗██╗    ██╗███████╗     █████╗  ██████╗ ███████╗███╗   ██╗████████╗
+██╔══██╗██║    ██║██╔════╝    ████╗  ██║██╔════╝██║    ██║██╔════╝    ██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝
+███████║██║ █╗ ██║███████╗    ██╔██╗ ██║█████╗  ██║ █╗ ██║███████╗    ███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║   
+██╔══██║██║███╗██║╚════██║    ██║╚██╗██║██╔══╝  ██║███╗██║╚════██║    ██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║   
+██║  ██║╚███╔███╔╝███████║    ██║ ╚████║███████╗╚███╔███╔╝███████║    ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   
+╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝    ╚═╝  ╚═══╝╚══════╝ ╚══╝╚══╝ ╚══════╝    ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝`;
+
+        // Welcome screen HTML
+        function getWelcomeHTML() {
+            return `
+                <div class="welcome">
+                    <div class="ascii-container">
+                        <div class="ascii-title">${ASCII_ART}</div>
+                        <div class="version">v1.0</div>
+                    </div>
+                    <div class="welcome-description">Ask me about recent AWS announcements or general AWS questions.</div>
+                    <div class="instructions">
+                        Type a question and press <span>Enter</span>.<br>
+                        Type <span>help</span> for commands.
+                    </div>
+                    <div class="readme-link">
+                        <a href="https://docs.digitalden.cloud/posts/building-a-bedrock-agent-with-aws-news-search" target="_blank">README →</a>
+                    </div>
+                    <div class="suggestions">
+                        <button class="suggestion" onclick="askQuestion('What is new with Lambda?')">What's new with Lambda?</button>
+                        <button class="suggestion" onclick="askQuestion('Any recent Bedrock updates?')">Bedrock updates</button>
+                        <button class="suggestion" onclick="askQuestion('What is Amazon Bedrock?')">What is Bedrock?</button>
+                    </div>
+                </div>`;
+        }
+
+        // Initialize terminal on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                initLoading.classList.add('hidden');
+                output.innerHTML = getWelcomeHTML();
+                input.disabled = false;
+                sendBtn.disabled = false;
+                input.focus();
+            }, 3000);
+        });
+
+        // Handle Enter key
+        input.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter' && input.value.trim()) {
+                await handleSend();
+            }
+        });
+
+        // Handle send
+        async function handleSend() {
+            const question = input.value.trim();
+            if (!question) return;
+            input.value = '';
+
+            const cmd = question.toLowerCase();
+
+            switch (cmd) {
+                case 'clear':  clearTerminal(); return;
+                case 'help':   showHelp();      return;
+                case 'about':  showAbout();     return;
+                case 'whoami': showWhoami();    return;
+            }
+
+            await sendMessage(question);
+        }
+
+        // Suggestion click
+        async function askQuestion(question) {
+            await sendMessage(question);
+        }
+
+        // Commands
+        function clearTerminal() {
+            output.innerHTML = getWelcomeHTML();
+        }
+
+        function showHelp() {
+            addLine('$ help', 'user');
+            addLine('', 'system');
+            addLine('Available commands:', 'system');
+            addLine('  help    - Show this message', 'system');
+            addLine('  clear   - Reset the terminal', 'system');
+            addLine('  about   - About this agent', 'system');
+            addLine('  whoami  - Who am I talking to?', 'system');
+            addLine('', 'system');
+            addLine('Or just ask me anything about AWS news!', 'system');
+        }
+
+        function showAbout() {
+            addLine('$ about', 'user');
+            addLine('', 'system');
+            addLine('AWS News Agent v1.0', 'system');
+            addLine('Powered by Amazon Bedrock', 'system');
+            addLine('', 'system');
+            addLine('This agent searches the AWS News Blog to answer', 'system');
+            addLine('your questions about recent AWS announcements.', 'system');
+        }
+
+        function showWhoami() {
+            addLine('$ whoami', 'user');
+            addLine('', 'system');
+            addLine('You\'re chatting with AWS News Agent v1.0', 'system');
+            addLine('A Bedrock-powered assistant for AWS news.', 'system');
+            addLine('', 'system');
+            addLineHTML('Built by <a href="https://digitalden.cloud" target="_blank">digitalden.cloud</a>', 'system');
+        }
+
+        // Send message to agent
+        async function sendMessage(message) {
+            addLine('$ ' + message, 'user');
+
+            sendBtn.disabled = true;
+            input.disabled = true;
+
+            const loadingLine = document.createElement('div');
+            loadingLine.className = 'output-line loading';
+            loadingLine.textContent = 'Agent is working';
+            output.appendChild(loadingLine);
+            scrollToBottom();
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, sessionId })
+                });
+
+                loadingLine.remove();
+
+                if (!response.ok) throw new Error('Request failed');
+
+                const data = await response.json();
+                addLine(data.response || data.body || 'No response received', 'response');
+
+            } catch (error) {
+                loadingLine.remove();
+                addLine('Error: Could not reach the agent. Check your API endpoint.', 'error');
+            }
+
+            sendBtn.disabled = false;
+            input.disabled = false;
+            input.focus();
+        }
+
+        // Output helpers
+        function addLine(text, type) {
+            const line = document.createElement('div');
+            line.className = 'output-line ' + type;
+            line.innerHTML = type === 'response' ? linkify(text) : escapeHTML(text);
+            output.appendChild(line);
+            scrollToBottom();
+        }
+
+        function addLineHTML(html, type) {
+            const line = document.createElement('div');
+            line.className = 'output-line ' + type;
+            line.innerHTML = html;
+            output.appendChild(line);
+            scrollToBottom();
+        }
+
+        function linkify(text) {
+            return escapeHTML(text).replace(
+                /(https?:\/\/[^\s]+)/g,
+                '<a href="$1" target="_blank">$1</a>'
+            );
+        }
+
+        function escapeHTML(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function scrollToBottom() {
+            output.scrollTop = output.scrollHeight;
+        }
+    </script>
+</body>
+</html>
