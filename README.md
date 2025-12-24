@@ -1,5 +1,3 @@
-# AWS News Agent
-
 ![Terminal Demo](terminal-demo.webp)
 
 ## Overview
