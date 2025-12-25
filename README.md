@@ -25,6 +25,8 @@ The agent decides whether to answer from its training data or invoke the RSS sea
 | `invoker_agent.py` | Lambda function that calls the Bedrock agent |
 | `search_aws_news.py` | Lambda function that searches the RSS feed |
 | `openapi-schema.yaml` | Action group API definition |
+| `system-prompt.txt` | Bedrock agent system prompt |
+| `test-agent.sh` | CloudShell script to test API endpoint |
 | `bedrock-agent-lambda-invoke-policy.json` | IAM policy for agent Lambda invocation |
 | `bedrock-invoke-agent-policy.json` | IAM policy for invoking Bedrock agent |
 
