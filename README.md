@@ -1,6 +1,7 @@
 ![Terminal Demo](terminal-demo.webp)
 
 ## Overview
+
 An Amazon Bedrock agent that searches the AWS News Blog RSS feed to answer questions about recent AWS announcements. Ask questions like "What's new with Bedrock?" or "Any recent Lambda updates?" and the agent retrieves live RSS data, identifies relevant posts, and returns summaries with direct links.
 
 **Key features:**
@@ -9,8 +10,15 @@ An Amazon Bedrock agent that searches the AWS News Blog RSS feed to answer quest
 - Terminal-style web interface
 - Minimal infrastructure
 
-## Architecture
+## Live Demo
 
+Try it here: [awsnews.digitalden.cloud](https://awsnews.digitalden.cloud/)
+
+## Video Tutorial
+
+Watch the full walkthrough: [YouTube](https://www.youtube.com/watch?v=soR93uEiiCU)
+
+## Architecture
 ```
 Amplify UI → API Gateway → Invoker Lambda → Bedrock Agent → Action Group → RSS Search Lambda
 ```
@@ -32,7 +40,7 @@ The agent decides whether to answer from its training data or invoke the RSS sea
 
 ## Documentation
 
-**Read the full docs:** [docs.digitalden.cloud](https://docs.digitalden.cloud/posts/building-a-bedrock-agent-with-aws-news-search)
+Read the full docs: [docs.digitalden.cloud](https://docs.digitalden.cloud/posts/building-a-bedrock-agent-with-aws-news-search)
 
 ## Quick Start
 
